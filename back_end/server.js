@@ -31,7 +31,7 @@ app.use(cookieParser()); //middleware to parse the cookie in protectRoute.js fil
 app.use("/api/auth",authRoute);
 app.use("/api/users",usersRoute);
 app.use("/api/posts",postRoute); 
-app.use
+app.use("/api/notify",notificationRoute);
 console.log(process.env.MONGO_URI); //giving undefined because we have to use dotenv package to see the content of .env file
 //starting the server
 app.listen(PORT,()=>{
