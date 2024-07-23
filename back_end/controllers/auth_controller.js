@@ -7,7 +7,7 @@ export const signup= async (req,res)=>{
         if(!req.body){
             return res.status(300).json({error:"invalid body"});
         }
-        const {fullname,username,email,password}= req.body;// it extract the all values from the react form.
+        const {fullName,username,email,password}= req.body;// it extract the all values from the react form.
         //  form validation
         const emailReg = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailReg.test(email)) {
@@ -24,6 +24,7 @@ export const signup= async (req,res)=>{
             return res.status(400).json({error:"Email is already exist"});
         }
         if(password.length<6){
+            console.log(fullName,username,email,password);
             return res.status(400).json({error: "password length atleast 6 charecter long"});
         }
          // Hash the password using bcrypt
@@ -38,7 +39,7 @@ export const signup= async (req,res)=>{
 
         // Store signup information in the collection
         const newUser = new User({
-            fullname,
+            fullName,
             username,
             email,
             password: hashPassword
@@ -49,7 +50,7 @@ export const signup= async (req,res)=>{
             generateTokenAndSetCookie(newUser._id,res);
             res.status(201).json({
                 _id: newUser._id,
-                fullname: newUser.fullname,
+                fullName: newUser.fullName,
                 username: newUser.username,
                 email: newUser.email,
                 followers: newUser.followers,
@@ -70,28 +71,35 @@ export const signup= async (req,res)=>{
 
 // login endpoint
 export const login=async (req,res)=>{
-    const {username,password} =req.body;
-    const user=await User.findOne({username});
-    const isPasswordCorrect= await bcrypt.compare(password,user?.password || "");
-
-    if(!user || isPasswordCorrect){
-        return res.status(400).json({error: "Invalid username and password"});
+    try{
+        const {username,password} =req.body;
+        const user=await User.findOne({username});
+        const isPasswordCorrect= await bcrypt.compare(password,user?.password || "");
+        console.log("error");
+        if(!user || isPasswordCorrect){
+            return res.status(400).json({error: "Invalid username and password"});
+        }
+        generateTokenAndSetCookie(user._id,res);
+        return res.json({
+            _id: user._id,
+            fullname:user.fullName,
+            username: user.username,
+            email: user.email,
+            followers: user.followers,
+            following: user.following,
+            profileImg: user.profileImg,
+            coverImg: user.coverImg,
+        })
     }
-    generateTokenAndSetCookie(user._id,res);
-    return res.json({
-        _id: user._id,
-        fullname:user.fullName,
-        username: user.username,
-        email: user.email,
-        followers: user.followers,
-        following: user.following,
-        profileImg: user.profileImg,
-        coverImg: user.coverImg,
-    })
+    catch(error){
+        console.log(error.message);
+        res.status(500).json({error:"internal server error"});
+    }
 }
 
 // logout endpoint
 export const logout=async (req,res)=>{
+    console.log("logout");
     try{
         res.cookie("jwt","",{maxAge:0})
         res.status(200).json({message:"Logged Out Successfully"})

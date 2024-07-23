@@ -3,7 +3,7 @@ import {PostSkeleton} from "../skeletons/PostSkeleton";
 import { POSTS } from "../../utils/db/dummy";
 
 export const Posts = () => {
-	const isLoading = true;
+	const isLoading = false;
 
 	return (
 		<>
